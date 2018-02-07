@@ -20,18 +20,31 @@ var myImages = [];
 	}
 
 	function getPhotoInfo(){
-		var image_id = /\/(\d+)\/\?/g.exec(document.baseURI)[1];
-		if(typeof acceptSet[image_id] === 'undefined')
+		var image_id;
+		if(document.baseURI.indexOf('photo.php') != -1)
+			image_id = /fbid=(\d+)/g.exec(document.baseURI)[1];
+		else
+			image_id = /\/(\d+)\/\?/g.exec(document.baseURI)[1];
+		if(acceptList.length > 0 && typeof acceptSet[image_id] === 'undefined')
 			return undefined;
 
-		var obj = document.getElementsByClassName('see_more_link_inner');
+		var obj = document.getElementsByClassName('fbPhotosPhotoCaption')[0].getElementsByClassName('see_more_link_inner');
 		var photo_info;
-		if(obj.length > 0)
+		var description = '';
+		if(obj.length > 0){
 			obj[0].click();
+			var text_elements = document.getElementsByClassName('text_exposed_root text_exposed');
+			if(text_elements.length > 0)
+				description = text_elements[0].innerText
+		}else{
+			var text_elements = document.getElementsByClassName('hasCaption');
+			if(text_elements.length > 0)
+				description = text_elements[0].innerText
+		}
 
 		photo_info = {
 			id: image_id,
-			text: obj.length > 0 ? document.getElementsByClassName('text_exposed_root text_exposed')[0].innerText : document.getElementsByClassName('hasCaption')[0].innerText,
+			text: description,
 			url: getPhotoUrl()
 		};
 		return photo_info;
