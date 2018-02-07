@@ -12,10 +12,7 @@
 // ==/UserScript==
 
 $(document).ready(function () {
-
-	// VERSION 1.0
-	// -------------------------------------
-	addGlobalStyle('.yt-downloader{ margin-top: 20px; clear: both; list-style: none; } .yt-downloader li{ display: inline-block; } .yt-downloader li:not(:first-child){ margin-left: 20px; } .yt-downloader a{ border: 1px solid #005D8F; color: #000; text-decoration: none; border-radius: 3px; background: linear-gradient(to bottom,#70CDFF,#EBF8FF); font-size: 14px; padding: 4px; } .yt-downloader a:hover{ border-color: #B88A00; background: linear-gradient(to bottom,#FFDB70,#FFFAEB); } ');
+	addGlobalStyle('.my-downloader{ padding-top: 20px; font-size: 18pt; } .my-downloader a{ display: inline-block; } .my-downloader a:not(:first-child){ margin-left: 20px; } .my-downloader a{ border: 1px solid #005D8F; color: #000; text-decoration: none; border-radius: 3px; background: linear-gradient(to bottom,#70CDFF,#EBF8FF); font-size: 14px; padding: 4px; } .my-downloader a:hover{ border-color: #B88A00; background: linear-gradient(to bottom,#FFDB70,#FFFAEB); } ');
 
     var link_objs = ytplayer.config.args.url_encoded_fmt_stream_map.split(',');
     var items = [];
@@ -32,9 +29,9 @@ $(document).ready(function () {
     });
     //console.log(items);
 
-    var download_pane = $('<ul class="yt-downloader"></ul>');
+    var download_pane = $('<div class="my-downloader"></div>');
     items.forEach(function(item){
-       download_pane.append('<li><a href="'+item.url+'">'+item.quality+'</a></li>');
+       download_pane.append('<a href="'+item.url+'">'+item.quality+'</a>');
     });
 	// --------------------------------
 
@@ -51,8 +48,24 @@ $(document).ready(function () {
 		oldOpenFunc.apply(this, arguments);
 	};
 
-	$('#watch7-user-header').append(download_pane).append('<p style="margin-top: 15px; color:blue;">วิธีใช้: คลิกขวาบนคุณภาพที่ต้องการแล้วเลือก "Save link as" หากใช้ไม่ได้ให้ทดลองโหลดด้วยลิงค์แยก Video กับ Audio ที่อยู่ด้านล่างแทน</p>')
-							.append('<p style="padding-top: 20px;"><b>Video: </b><span id="ydl_video_link"></span><br><b>Audio: </b><span id="ydl_audio_link"></span></span></p>');
+    var foundInsertionPoint = false;
+    var insertionTicker;
+
+    function waitingForInsert()
+    {
+        if(!foundInsertionPoint){
+            if($('#messages').length > 0){
+                foundInsertionPoint = true;
+                setTimeout(function(){
+                    $('#messages').append(download_pane).append('<div style="margin-top: 15px; color:blue; font-size:14px;">วิธีใช้: คลิกขวาบนคุณภาพที่ต้องการแล้วเลือก "Save link as" หากใช้ไม่ได้ให้ทดลองโหลดด้วยลิงค์แยก Video กับ Audio ที่อยู่ด้านล่างแทน</div>')
+                   .append('<div style="padding-top: 20px; font-size:14px;"><b>Video: </b><span id="ydl_video_link"></span><br><b>Audio: </b><span id="ydl_audio_link"></span></span></div>');
+                }, 5000);
+                clearInterval(insertionTicker);
+            }
+        }
+    }
+
+    insertionTicker = setInterval(waitingForInsert, 100);
 });
 
 function tryReplaceRange(str){
